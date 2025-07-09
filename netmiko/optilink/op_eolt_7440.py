@@ -8,12 +8,11 @@ class OptilinkEOLT7440Base(CiscoBaseConnection):
 
     def session_preparation(self) -> None:
         self._test_channel_read(pattern=r"[>#]")
-        # self.set_base_prompt()
-        # self.enable()
-        # self.config_mode()
-        # self.send_command("vty output show-all")
-        # self.exit_config_mode()
-        # self.exit_enable_mode()
+        self.set_base_prompt()
+        self.enable()
+        self.disable_paging()
+        self.clear_buffer()
+        self.exit_enable_mode()
 
     def config_mode(
         self,

@@ -12,7 +12,13 @@ class OptilinkEOLT7440Base(CiscoBaseConnection):
         self.enable()
         self.disable_paging()
         self.clear_buffer()
-        self.exit_enable_mode()
+        # Don't exit enable mode - stay in enable mode for commands
+        # self.exit_enable_mode()
+
+    def disable_paging(self, *args, **kwargs) -> str:
+        """OptilinkEOLT7440 doesn't need paging disabled or uses different command."""
+        # For now, just return empty string - no paging command needed
+        return ""
 
     def config_mode(
         self,
@@ -36,8 +42,12 @@ class OptilinkEOLT7440Base(CiscoBaseConnection):
         output = ""
         if self.check_enable_mode():
             self.write_channel(self.normalize_cmd(exit_command))
-            self.read_until_pattern(pattern=exit_command)
-            output += self.read_until_pattern(pattern=r".*>")
+            try:
+                self.read_until_pattern(pattern=exit_command)
+                output += self.read_until_prompt()
+            except Exception:
+                # If there's an issue reading the pattern, just read until prompt
+                output += self.read_until_prompt()
             if self.check_enable_mode():
                 raise ValueError("Failed to exit enable mode.")
         return output

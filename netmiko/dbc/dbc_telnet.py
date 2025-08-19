@@ -42,6 +42,57 @@ class DbcBase(CiscoIosBase):
         self.base_prompt = base_prompt
         return self.base_prompt
 
+    def normalize_linefeeds(self, a_string: str) -> str:
+        """Convert '\r\r\n','\r\n', '\n\r' to '\n'."""
+        newline = re.sub(r"\r\r\n|\r\n|\n\r", "\n", a_string)
+        return newline
+
+    def strip_prompt(self, a_string: str) -> str:
+        """Strip the trailing router prompt from the output."""
+        # More flexible prompt stripping for DBC devices
+        response_list = a_string.split("\n")
+        if response_list:
+            last_line = response_list[-1]
+            # Check if last line looks like a DBC prompt
+            if re.search(r".*#\s*$", last_line):
+                return "\n".join(response_list[:-1])
+        return a_string
+
+    def find_prompt(self, delay_factor: float = 1.0, pattern: Optional[str] = None) -> str:
+        """
+        Finds the current network device prompt, last line only.
+        
+        For DBC devices, we need to handle both config and exec mode prompts.
+        """
+        if pattern is None:
+            # DBC devices use # as terminator, with optional (config) part
+            pattern = r"[^\r\n]*#\s*$"
+        
+        delay_factor = self.select_delay_factor(delay_factor)
+        sleep_time = delay_factor * 0.25
+        self.clear_buffer()
+        self.write_channel(self.RETURN)
+        
+        # Give the device time to respond
+        import time
+        time.sleep(sleep_time)
+        
+        # Read the output
+        output = self.read_channel()
+        
+        # Find the prompt in the output
+        output = self.normalize_linefeeds(output)
+        lines = output.split('\n')
+        
+        # Look for the prompt in the last few lines
+        for line in reversed(lines):
+            line = line.strip()
+            if line and re.search(pattern, line):
+                return line
+        
+        # If no prompt found, raise an error
+        raise ValueError(f"Unable to find prompt in output: {repr(output)}")
+
     def check_config_mode(
         self,
         check_string: str = "(config",

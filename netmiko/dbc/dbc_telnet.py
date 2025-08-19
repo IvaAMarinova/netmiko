@@ -17,23 +17,28 @@ class DbcBase(CiscoIosBase):
         Set base prompt for DBC devices using proper pattern matching.
         
         DBC devices use format: hostname# or hostname(config)#
-        Unlike Cisco IOS, this doesn't truncate the prompt to 16 characters.
+        The base prompt should be just the hostname part without (config).
         """
         # DBC devices primarily use # as terminator
         if pattern is None:
             pattern = r"#\s*$"
         
-        # Use the parent's parent method (BaseConnection.set_base_prompt)
-        # to avoid the truncation in CiscoIosBase
-        base_prompt = super(CiscoIosBase, self).set_base_prompt(
-            pri_prompt_terminator=pri_prompt_terminator,
-            alt_prompt_terminator=alt_prompt_terminator,
-            delay_factor=delay_factor,
-            pattern=pattern,
-        )
+        # Get the current prompt
+        prompt = self.find_prompt(delay_factor=delay_factor, pattern=pattern)
         
-        # Don't truncate the base_prompt like CiscoIosBase does
-        # Keep the full prompt for proper pattern matching
+        if not prompt.endswith("#"):
+            raise ValueError(f"DBC prompt not found or invalid: {repr(prompt)}")
+        
+        # Remove the # terminator
+        base_prompt = prompt[:-1].strip()
+        
+        # Remove (config) or (config-*) parts if present
+        # This handles: hostname(config)# -> hostname
+        #              hostname(config-if)# -> hostname  
+        config_pattern = r'\(config[^)]*\)$'
+        base_prompt = re.sub(config_pattern, '', base_prompt).strip()
+        
+        # Don't truncate like Cisco IOS does - keep the full hostname
         self.base_prompt = base_prompt
         return self.base_prompt
 
@@ -63,4 +68,8 @@ class DbcBase(CiscoIosBase):
 
 class DbcTelnet(DbcBase):
     """DBC Telnet driver that properly handles prompt detection without truncation."""
-    pass
+    
+    def session_preparation(self) -> None:
+        """Prepare the session after the connection has been established."""
+        # DBC devices log in directly to config mode, so we just need to set the base prompt
+        self.set_base_prompt()

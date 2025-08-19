@@ -9,17 +9,20 @@ class DbcBase(CiscoIosBase):
     def set_base_prompt(
         self,
         pri_prompt_terminator: str = "#",
-        alt_prompt_terminator: str = ">",
+        alt_prompt_terminator: str = "",
         delay_factor: float = 1.0,
         pattern: Optional[str] = None,
     ) -> str:
         """
         Set base prompt for DBC devices using proper pattern matching.
         
+        DBC devices use format: hostname# or hostname(config)#
         Unlike Cisco IOS, this doesn't truncate the prompt to 16 characters.
-        Instead, it uses pattern matching to properly detect prompts containing
-        (config), #, or > terminators.
         """
+        # DBC devices primarily use # as terminator
+        if pattern is None:
+            pattern = r"#\s*$"
+        
         # Use the parent's parent method (BaseConnection.set_base_prompt)
         # to avoid the truncation in CiscoIosBase
         base_prompt = super(CiscoIosBase, self).set_base_prompt(
@@ -37,14 +40,15 @@ class DbcBase(CiscoIosBase):
     def check_config_mode(
         self,
         check_string: str = "(config",
-        pattern: str = r"[>#]",
+        pattern: str = r"#\s*$",
         force_regex: bool = False,
     ) -> bool:
         """
         Check if device is in configuration mode.
         
-        DBC devices use (config) in the prompt when in configuration mode.
-        This method looks for the (config) string in the current prompt.
+        DBC devices use (config) in the prompt when in configuration mode:
+        - Config mode: hostname(config)#
+        - Exec mode: hostname#
         """
         # Get current prompt
         current_prompt = self.find_prompt()
@@ -53,10 +57,8 @@ class DbcBase(CiscoIosBase):
         if check_string in current_prompt:
             return True
         
-        # Fallback to parent method for additional checks
-        return super().check_config_mode(
-            check_string=check_string, pattern=pattern, force_regex=force_regex
-        )
+        # Not in config mode
+        return False
 
 
 class DbcTelnet(DbcBase):

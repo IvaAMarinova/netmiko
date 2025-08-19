@@ -52,6 +52,7 @@ from netmiko.cisco import CiscoXrSSH, CiscoXrTelnet, CiscoXrFileTransfer
 from netmiko.citrix import NetscalerSSH
 from netmiko.cloudgenix import CloudGenixIonSSH
 from netmiko.coriant import CoriantSSH
+from netmiko.dbc import DbcTelnet
 from netmiko.dell import DellDNOS6SSH
 from netmiko.dell import DellDNOS6Telnet
 from netmiko.dell import DellForce10SSH
@@ -349,6 +350,7 @@ CLASS_MAPPER["cisco_s200_telnet"] = CiscoS200Telnet
 CLASS_MAPPER["cisco_s300_telnet"] = CiscoS300Telnet
 CLASS_MAPPER["dell_dnos6_telnet"] = DellDNOS6Telnet
 CLASS_MAPPER["dell_powerconnect_telnet"] = DellPowerConnectTelnet
+CLASS_MAPPER["dbc_telnet"] = DbcTelnet
 CLASS_MAPPER["dlink_ds_telnet"] = DlinkDSTelnet
 CLASS_MAPPER["extreme_telnet"] = ExtremeExosTelnet
 CLASS_MAPPER["extreme_exos_telnet"] = ExtremeExosTelnet

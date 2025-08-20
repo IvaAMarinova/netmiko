@@ -20,14 +20,16 @@ class DbcTelnet(CiscoBaseConnection):
         delay_factor: float = 1.0,
         pattern: Optional[str] = None,
     ) -> str:
-        """Set base prompt with ANSI cleaning, no truncation."""
+        """Set base prompt, removing terminators and config suffixes."""
         prompt = self.find_prompt(delay_factor=delay_factor, pattern=pattern).strip()
 
-        # Clean ANSI codes and backspaces
-        prompt = re.sub(r"\x1b\[[0-9;?]*[ -/]*[@-~]", "", prompt)
-        prompt = re.sub(r"\x08+.", "", prompt)
-        prompt = re.sub(r"[>#]\s*$", "", prompt)
+        # Remove config mode suffixes like (config)
         prompt = re.sub(r"\([^)]*\)\s*$", "", prompt)
+        
+        if prompt.endswith(pri_prompt_terminator):
+            prompt = prompt[:-len(pri_prompt_terminator)]
+        elif prompt.endswith(alt_prompt_terminator):
+            prompt = prompt[:-len(alt_prompt_terminator)]
 
         self.base_prompt = prompt.strip()
         return self.base_prompt

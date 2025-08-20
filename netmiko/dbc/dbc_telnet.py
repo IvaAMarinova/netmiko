@@ -23,13 +23,12 @@ class DbcTelnet(CiscoBaseConnection):
         """Set base prompt, removing terminators and config suffixes."""
         prompt = self.find_prompt(delay_factor=delay_factor, pattern=pattern).strip()
 
-        # Remove config mode suffixes like (config)
-        prompt = re.sub(r"\([^)]*\)\s*$", "", prompt)
-        
         if prompt.endswith(pri_prompt_terminator):
             prompt = prompt[:-len(pri_prompt_terminator)]
         elif prompt.endswith(alt_prompt_terminator):
             prompt = prompt[:-len(alt_prompt_terminator)]
+        
+        prompt = re.sub(r"\([^)]*\)\s*$", "", prompt)
 
         self.base_prompt = prompt.strip()
         return self.base_prompt

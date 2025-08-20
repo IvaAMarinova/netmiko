@@ -52,13 +52,15 @@ class DbcTelnet(CiscoBaseConnection):
     def find_prompt(self, delay_factor: float = 1.0, pattern: Optional[str] = None) -> str:
         """Find prompt, handling --More-- if present."""
         
-        for _ in range(10):
-            output = self.read_channel()
-            
-            if "--More--" in output:
+        output = self.read_channel()
+        if "--More--" in output:
+            while True:
                 self.write_channel(" ")
                 time.sleep(0.3 * self.global_delay_factor)
-            else:
-                break
+                new_output = self.read_channel()
+                
+                if "--More--" not in new_output:
+                    time.sleep(0.5 * self.global_delay_factor)
+                    break
         
         return super().find_prompt(delay_factor=delay_factor, pattern=pattern)

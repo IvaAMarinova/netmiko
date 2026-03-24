@@ -57,6 +57,14 @@ class OptilinkEOLT7440Base(CiscoBaseConnection):
         return super().exit_config_mode(exit_config=exit_config, pattern=pattern)
 
 
+class OptilinkEOLT7440SSH(OptilinkEOLT7440Base):
+    """
+    Optilink EOLT 74408E SSH driver
+    """
+
+    pass
+
+
 class OptilinkEOLT7440Telnet(OptilinkEOLT7440Base):
     """
     Optilink EOLT 74408E telnet driver

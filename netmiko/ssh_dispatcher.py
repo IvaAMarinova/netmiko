@@ -146,6 +146,7 @@ from netmiko.supermicro import SmciSwitchSmisTelnet
 from netmiko.zyxel import ZyxelSSH
 from netmiko.optilink.op_golt_944 import OptilinkGOLT944Telnet
 from netmiko.optilink.op_eolt_9702 import OptilinkEOLT9702Telnet
+from netmiko.optilink.op_eolt_7440 import OptilinkEOLT7440SSH
 from netmiko.optilink.op_eolt_7440 import OptilinkEOLT7440Telnet
 from netmiko.optilink.op_golt_924 import OptilinkGOLT924Telnet
 from netmiko.genexis.genexis_solt33 import GenexisSOLT33Telnet
@@ -380,6 +381,7 @@ CLASS_MAPPER["optilink_golt_944_telnet"] = OptilinkGOLT944Telnet
 CLASS_MAPPER["optilink_golt_924_telnet"] = OptilinkGOLT924Telnet
 CLASS_MAPPER["optilink_eolt_11444_telnet"] = OptilinkEOLT11444Telnet
 CLASS_MAPPER["optilink_eolt_9702_telnet"] = OptilinkEOLT9702Telnet
+CLASS_MAPPER["optilink_eolt_7440_ssh"] = OptilinkEOLT7440SSH
 CLASS_MAPPER["optilink_eolt_7440_telnet"] = OptilinkEOLT7440Telnet
 CLASS_MAPPER["genexis_solt33_telnet"] = GenexisSOLT33Telnet
 

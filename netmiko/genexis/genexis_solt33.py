@@ -7,6 +7,17 @@ class GenexisSOLT33Base(CiscoBaseConnection):
         self.set_base_prompt()
         self.enable()
         self.config_mode()
+        # The Saturn streams asynchronous alarm/log messages to the terminal
+        # (monitor / vty) line. That continuous output has no quiet gap, so it
+        # breaks netmiko's gap-based reads (check_config_mode inside
+        # determine_current_mode, and every send_command_timing call) with
+        # "continually outputting data", and intermittently fails ONU
+        # operations depending on whether an alarm happens to be streaming.
+        # Silence the session as early as possible. Use a prompt-anchored read
+        # (expect_string) so this command survives any spew already in flight.
+        self.send_command(
+            "no logging monitor", expect_string=r"#", read_timeout=30
+        )
         cmd = "line width 256"
         self.set_terminal_width(command=cmd, pattern=cmd)
         self.disable_paging(command="screen-rows per-page 0")
